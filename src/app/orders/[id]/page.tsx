@@ -7,6 +7,7 @@ import { useAuth } from "@/context/auth-context";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { formatNaira, safeDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { ApiResponse, OrderDetails } from "@/types";
 
 const WORKFLOW_STEPS = [
   "Pending",
@@ -21,7 +22,7 @@ export default function OrderDetailsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { user, loading: authLoading, authFetch } = useAuth();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,7 +39,7 @@ export default function OrderDetailsPage() {
       try {
         setLoading(true);
         const res = await authFetch(`/api/orders/${params.id}`);
-        const payload = await res.json();
+        const payload = (await res.json()) as ApiResponse<OrderDetails>;
         if (!active) return;
         if (payload.success && payload.data) {
           setOrder(payload.data);
@@ -122,7 +123,7 @@ export default function OrderDetailsPage() {
         <div className="mt-6">
           <h2 className="font-semibold">Order Items</h2>
           <div className="mt-3 divide-y divide-slate-200 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
-            {(order.items ?? []).map((item: any) => (
+            {order.items.map((item) => (
               <div key={item.id} className="flex items-center justify-between p-3 text-sm">
                 <div>
                   <p className="font-medium">{item.medicineName}</p>

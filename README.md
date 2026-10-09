@@ -5,8 +5,8 @@ A complete full-stack MVP for Nigerian pharmacy ordering using **Next.js App Rou
 ## Core Features
 - Customer registration/login/logout with JWT cookie sessions
 - Medicine browsing, search, filter and availability checks
-- Cart, checkout, order placement and order history
-- Order fulfilment tracking workflow
+- Per-account persistent cart with stock-aware quantity editing, profile-prefilled checkout, delivery details, and payment-status simulation
+- Order fulfilment tracking workflow with atomic stock reservation and one-time stock restoration on cancellation
 - Admin dashboard for medicines, categories, orders, inventory/status updates
 - Nigerian context with **Naira (₦)** pricing
 
@@ -51,6 +51,12 @@ A complete full-stack MVP for Nigerian pharmacy ordering using **Next.js App Rou
 - `GET/PUT /api/users/profile`
 - `GET /api/search`
 - `POST /api/seed`
+
+### Medicine API
+- `GET /api/medicines` supports `search`, `category`, `availability` (`in-stock` or `out-of-stock`), `minPrice`, `maxPrice`, `page`, and `limit` (1–100). Results are sorted by name and include pagination metadata.
+- Invalid filters, page values, and price ranges return `400`.
+- `POST /api/medicines` and `PUT /api/medicines/:id` require an admin session and validate the full medicine payload, including an active category and a price with at most two decimal places.
+- `DELETE /api/medicines/:id` requires an admin session and deactivates the medicine without discarding its stock count.
 
 ## Database Tables
 - `users`

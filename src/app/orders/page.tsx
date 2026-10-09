@@ -8,12 +8,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { formatNaira, safeDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { ApiResponse, OrderSummary } from "@/types";
 
 export default function OrdersPage() {
   const router = useRouter();
   const { user, loading: authLoading, authFetch } = useAuth();
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -28,12 +30,14 @@ export default function OrdersPage() {
       try {
         setLoading(true);
         const res = await authFetch("/api/orders/my-orders");
-        const payload = await res.json();
+        const payload = (await res.json()) as ApiResponse<OrderSummary[]>;
         if (active && payload.success && Array.isArray(payload.data)) {
           setRows(payload.data);
+        } else if (active) {
+          setError(payload.message || "Unable to load your order history.");
         }
       } catch {
-        // Ignore
+        if (active) setError("Unable to load your order history. Please try again.");
       } finally {
         if (active) setLoading(false);
       }
@@ -55,9 +59,14 @@ export default function OrdersPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">My Orders</h1>
+        {error ? (
+          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </p>
+        ) : null}
         <EmptyState
-          title="You have not placed any orders yet."
-          subtitle="When you place an order from the medicine catalogue, it will appear here."
+          title={error ? "Your orders could not be loaded." : "You have not placed any orders yet."}
+          subtitle={error ? "Please refresh the page to try again." : "When you place an order from the medicine catalogue, it will appear here."}
         />
       </div>
     );
@@ -74,6 +83,11 @@ export default function OrdersPage() {
           Order More Medicines
         </Link>
       </div>
+      {error ? (
+        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          {error}
+        </p>
+      ) : null}
       <div className="space-y-3">
         {rows.map((o) => (
           <article

@@ -12,17 +12,15 @@ import { cn } from "@/lib/utils";
 export function Header() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { items } = useCart();
+  const { itemCount } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const links = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
     { href: "/medicines", label: "Medicines" },
-    { href: "/cart", label: cartCount > 0 ? `Cart (${cartCount})` : "Cart" },
+    { href: "/cart", label: itemCount > 0 ? `Cart (${itemCount})` : "Cart" },
     ...(user
       ? [
           { href: "/dashboard", label: "Dashboard" },
